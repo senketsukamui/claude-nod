@@ -30,18 +30,27 @@ final class GestureDetector {
 
         let pitchSpan = recentSamples.map(\.pitch).span
         let yawSpan = recentSamples.map(\.yaw).span
+        let rollSpan = recentSamples.map(\.roll).span
         let avgPitchRate = recentSamples.map { abs($0.rotationX) }.average
         let avgYawRate = recentSamples.map { abs($0.rotationY) }.average
+        let avgRollRate = recentSamples.map { abs($0.rotationZ) }.average
 
         let nodThreshold = 0.28 / sensitivity
-        let shakeThreshold = 0.34 / sensitivity
+        let shakeThreshold = 0.18 / sensitivity
+        let shakeRateThreshold = 0.55 / sensitivity
+        let rollShakeThreshold = 0.16 / sensitivity
+        let rollRateThreshold = 0.7 / sensitivity
 
         if pitchSpan > nodThreshold && avgPitchRate > 0.9 {
             lastGestureTime = sample.timestamp
             return .nod
         }
 
-        if yawSpan > shakeThreshold && avgYawRate > 1.1 {
+        let isYawShake = yawSpan > shakeThreshold && avgYawRate > shakeRateThreshold
+        let isRollShake = rollSpan > rollShakeThreshold && avgRollRate > rollRateThreshold
+        let looksLikeNodInstead = pitchSpan > (nodThreshold * 0.9) && avgPitchRate > 0.75
+
+        if (isYawShake || isRollShake) && !looksLikeNodInstead {
             lastGestureTime = sample.timestamp
             return .shake
         }
