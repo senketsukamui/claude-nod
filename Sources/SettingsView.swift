@@ -23,17 +23,52 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Section("Permissions") {
-                Text("Accessibility is required so ClaudeNod can send keyboard input to the frontmost Claude Code app or terminal.")
+            Section("Prompt Detection") {
+                Toggle("Auto-arm when Claude confirmation is visible", isOn: $appState.autoArmEnabled)
+                Text("The easiest path is launching Claude through the ClaudeNod wrapper. Then the app reads real Claude output instead of guessing from the screen.")
                     .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("Wrapper status: \(appState.wrapperStatus)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("Run the repo's `bin/claudenod` script instead of `claude` to get the easiest setup.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Permissions") {
+                Text("If you use the ClaudeNod wrapper, Accessibility and screen capture are optional. They are only needed for the older fallback mode that controls an already-open host app directly.")
+                    .font(.caption)
+                Text(appState.accessibilityStatus)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(appState.screenCaptureStatus)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("Current app path: \(appState.runningAppPath)")
+                    .font(.caption2)
+                    .textSelection(.enabled)
+                    .foregroundStyle(.secondary)
+                HStack {
+                    Button("Grant Required Permissions") {
+                        appState.requestRequiredPermissions()
+                    }
+                    Button("Refresh Status") {
+                        appState.refreshAccessibilityStatus()
+                        appState.refreshScreenCaptureStatus()
+                    }
+                }
                 Button("Open Accessibility Settings") {
-                    openAccessibilitySettings()
+                    appState.openAccessibilitySettings()
+                }
+                Button("Open Screen Capture Settings") {
+                    appState.openScreenCaptureSettings()
                 }
             }
 
             Section("How v1 Works") {
-                Text("1. Open a Claude Code confirmation.")
-                Text("2. Arm ClaudeNod from the menu bar.")
+                Text("1. Launch Claude with the ClaudeNod wrapper.")
+                Text("2. Open a Claude confirmation and let ClaudeNod auto-arm.")
                 Text("3. Nod to accept or shake to reject.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -41,12 +76,5 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
-    }
-
-    private func openAccessibilitySettings() {
-        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") else {
-            return
-        }
-        NSWorkspace.shared.open(url)
     }
 }

@@ -1,7 +1,10 @@
+import AppKit
 import SwiftUI
 
 struct MenuBarView: View {
+    @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var appState: AppState
+    let settingsWindowID: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -14,6 +17,11 @@ struct MenuBarView: View {
             }
 
             statusRow(title: "AirPods", value: appState.connectionStatus)
+            statusRow(title: "Wrapper", value: appState.wrapperStatus)
+            statusRow(title: "Accessibility", value: appState.accessibilityStatus)
+            statusRow(title: "Screen", value: appState.screenCaptureStatus)
+            statusRow(title: "Prompt", value: appState.promptStatus)
+            statusRow(title: "Prompt Text", value: appState.promptDebugPreview)
             statusRow(title: "Gesture", value: appState.gestureStatus)
             statusRow(title: "Action", value: appState.lastAction)
             statusRow(title: "Mode", value: appState.integrationStatus)
@@ -32,6 +40,8 @@ struct MenuBarView: View {
                 Text("Arm next confirmation")
             }
 
+            Toggle("Auto-arm on detected prompt", isOn: $appState.autoArmEnabled)
+
             HStack {
                 Button("Test Accept") {
                     appState.sendTestGesture(.nod)
@@ -41,11 +51,21 @@ struct MenuBarView: View {
                 }
             }
 
+            if !appState.wrapperStatus.contains("Connected")
+                && (!appState.accessibilityStatus.contains("granted") || !appState.screenCaptureStatus.contains("granted")) {
+                Button("Grant Required Permissions") {
+                    appState.requestRequiredPermissions()
+                }
+            }
+
             Divider()
 
             HStack {
                 Button("Settings") {
-                    appState.openSettings()
+                    NSApp.activate(ignoringOtherApps: true)
+                    DispatchQueue.main.async {
+                        openWindow(id: settingsWindowID)
+                    }
                 }
                 Spacer()
                 Button("Quit") {

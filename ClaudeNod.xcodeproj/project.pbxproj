@@ -1,0 +1,385 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		002C20E3E8E00420AD6BA5F7 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98DE858B1C557A7D9373F059 /* MenuBarView.swift */; };
+		2DD0C995668E3798E8A1FDD5 /* ClaudePromptDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC11E765BD610AE4A411B5F /* ClaudePromptDetector.swift */; };
+		3ECCF12511462AD5F8EA8093 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 696BFF59B256AB281FDB09E9 /* Cocoa.framework */; };
+		3FAD6B6A97337088DB39F38B /* ScreenCapturePermissionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7712F90F3428BDCE913D0BA /* ScreenCapturePermissionService.swift */; };
+		400C4A2D3389C1C1131ECF21 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485D3ED9FE3725BEF994A451 /* AppState.swift */; };
+		60626D19E31B4AAE83231EC6 /* ClaudeCodeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39FD6C484AE2A1C94FE3C99 /* ClaudeCodeController.swift */; };
+		66CEE9C00E9E8FC4616546FA /* ClaudeNodPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9BCBFEA9FD1194AA482EC0 /* ClaudeNodPaths.swift */; };
+		7EC1F834EBA184CCA0E21B73 /* ClaudeNodBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F93C372540F28B70C63A5EAD /* ClaudeNodBridge.swift */; };
+		806DBC47F5B99E8AE36CDD93 /* ClaudeNodApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8235FC831C79B840A9BC70D /* ClaudeNodApp.swift */; };
+		AC6DCD7541ED61B7DBA79BF5 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1C32F25BBFBF40BAD0C57A /* SettingsView.swift */; };
+		EBC3A32D4FACA56987D9A658 /* HeadphoneMotionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603E1438AADF7ADE829B9399 /* HeadphoneMotionService.swift */; };
+		F663314507B94EB939B92467 /* AccessibilityPermissionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873070A876DD70FC20D50B70 /* AccessibilityPermissionService.swift */; };
+		FB738ABC7D72F862340BE4E5 /* GestureDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2803C597BA129617D7140F0C /* GestureDetector.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1A1C32F25BBFBF40BAD0C57A /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		27610089FF0A2504A679A59F /* ClaudeNod-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "ClaudeNod-Info.plist"; sourceTree = "<group>"; };
+		2803C597BA129617D7140F0C /* GestureDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GestureDetector.swift; sourceTree = "<group>"; };
+		485D3ED9FE3725BEF994A451 /* AppState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		4FC11E765BD610AE4A411B5F /* ClaudePromptDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClaudePromptDetector.swift; sourceTree = "<group>"; };
+		603E1438AADF7ADE829B9399 /* HeadphoneMotionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HeadphoneMotionService.swift; sourceTree = "<group>"; };
+		67B6FC6CF67B8851B415F76F /* ClaudeNod.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = ClaudeNod.app; path = ClaudeNod.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		696BFF59B256AB281FDB09E9 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		873070A876DD70FC20D50B70 /* AccessibilityPermissionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionService.swift; sourceTree = "<group>"; };
+		98DE858B1C557A7D9373F059 /* MenuBarView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		B8235FC831C79B840A9BC70D /* ClaudeNodApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClaudeNodApp.swift; sourceTree = "<group>"; };
+		BE9BCBFEA9FD1194AA482EC0 /* ClaudeNodPaths.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClaudeNodPaths.swift; sourceTree = "<group>"; };
+		D7712F90F3428BDCE913D0BA /* ScreenCapturePermissionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenCapturePermissionService.swift; sourceTree = "<group>"; };
+		E39FD6C484AE2A1C94FE3C99 /* ClaudeCodeController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClaudeCodeController.swift; sourceTree = "<group>"; };
+		F93C372540F28B70C63A5EAD /* ClaudeNodBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClaudeNodBridge.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		97DC73E515C3A42D1B132B54 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3ECCF12511462AD5F8EA8093 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		58CDE726CC485B2C34A8EB71 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E6C9D212876F53C5D320D233 /* OS X */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		6318FF26E96C3CE3200CEF9C /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				27610089FF0A2504A679A59F /* ClaudeNod-Info.plist */,
+			);
+			name = Config;
+			path = Config;
+			sourceTree = "<group>";
+		};
+		67079C1F861724D93A1190BE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				67B6FC6CF67B8851B415F76F /* ClaudeNod.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		79C78C9D0DDC3AC7D6EF4822 = {
+			isa = PBXGroup;
+			children = (
+				67079C1F861724D93A1190BE /* Products */,
+				58CDE726CC485B2C34A8EB71 /* Frameworks */,
+				E7F6876200938A8EAF5CD2E4 /* Sources */,
+				6318FF26E96C3CE3200CEF9C /* Config */,
+			);
+			sourceTree = "<group>";
+		};
+		E6C9D212876F53C5D320D233 /* OS X */ = {
+			isa = PBXGroup;
+			children = (
+				696BFF59B256AB281FDB09E9 /* Cocoa.framework */,
+			);
+			name = "OS X";
+			sourceTree = "<group>";
+		};
+		E7F6876200938A8EAF5CD2E4 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				873070A876DD70FC20D50B70 /* AccessibilityPermissionService.swift */,
+				485D3ED9FE3725BEF994A451 /* AppState.swift */,
+				E39FD6C484AE2A1C94FE3C99 /* ClaudeCodeController.swift */,
+				B8235FC831C79B840A9BC70D /* ClaudeNodApp.swift */,
+				F93C372540F28B70C63A5EAD /* ClaudeNodBridge.swift */,
+				BE9BCBFEA9FD1194AA482EC0 /* ClaudeNodPaths.swift */,
+				4FC11E765BD610AE4A411B5F /* ClaudePromptDetector.swift */,
+				2803C597BA129617D7140F0C /* GestureDetector.swift */,
+				603E1438AADF7ADE829B9399 /* HeadphoneMotionService.swift */,
+				98DE858B1C557A7D9373F059 /* MenuBarView.swift */,
+				D7712F90F3428BDCE913D0BA /* ScreenCapturePermissionService.swift */,
+				1A1C32F25BBFBF40BAD0C57A /* SettingsView.swift */,
+			);
+			name = Sources;
+			path = Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B11CE941E8E954A2E438D508 /* ClaudeNod */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D357AAEBFF369A6027D2C792 /* Build configuration list for PBXNativeTarget "ClaudeNod" */;
+			buildPhases = (
+				DD523177DB1BCEF865F652F1 /* Sources */,
+				97DC73E515C3A42D1B132B54 /* Frameworks */,
+				74003F754E40F22A52F0368C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ClaudeNod;
+			productName = ClaudeNod;
+			productReference = 67B6FC6CF67B8851B415F76F /* ClaudeNod.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4CDCAF617591DBE1D0B89D72 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = 2FECC114CF183780615982E2 /* Build configuration list for PBXProject "ClaudeNod" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 79C78C9D0DDC3AC7D6EF4822;
+			minimizedProjectReferenceProxies = 0;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 67079C1F861724D93A1190BE /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B11CE941E8E954A2E438D508 /* ClaudeNod */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		74003F754E40F22A52F0368C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DD523177DB1BCEF865F652F1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F663314507B94EB939B92467 /* AccessibilityPermissionService.swift in Sources */,
+				400C4A2D3389C1C1131ECF21 /* AppState.swift in Sources */,
+				60626D19E31B4AAE83231EC6 /* ClaudeCodeController.swift in Sources */,
+				806DBC47F5B99E8AE36CDD93 /* ClaudeNodApp.swift in Sources */,
+				7EC1F834EBA184CCA0E21B73 /* ClaudeNodBridge.swift in Sources */,
+				66CEE9C00E9E8FC4616546FA /* ClaudeNodPaths.swift in Sources */,
+				2DD0C995668E3798E8A1FDD5 /* ClaudePromptDetector.swift in Sources */,
+				FB738ABC7D72F862340BE4E5 /* GestureDetector.swift in Sources */,
+				EBC3A32D4FACA56987D9A658 /* HeadphoneMotionService.swift in Sources */,
+				002C20E3E8E00420AD6BA5F7 /* MenuBarView.swift in Sources */,
+				3FAD6B6A97337088DB39F38B /* ScreenCapturePermissionService.swift in Sources */,
+				AC6DCD7541ED61B7DBA79BF5 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		175AF83C6277FA1739B9E33F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		C27DA5BD32380B58F6F5C210 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/ClaudeNod-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.senketsukamui.claudenod;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		D3C1DE378C83F0872094EAB5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/ClaudeNod-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.senketsukamui.claudenod;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		E5A2F427DE5CB58D924E5A79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2FECC114CF183780615982E2 /* Build configuration list for PBXProject "ClaudeNod" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E5A2F427DE5CB58D924E5A79 /* Debug */,
+				175AF83C6277FA1739B9E33F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D357AAEBFF369A6027D2C792 /* Build configuration list for PBXNativeTarget "ClaudeNod" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C27DA5BD32380B58F6F5C210 /* Release */,
+				D3C1DE378C83F0872094EAB5 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4CDCAF617591DBE1D0B89D72 /* Project object */;
+}

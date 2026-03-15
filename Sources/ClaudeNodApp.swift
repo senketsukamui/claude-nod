@@ -5,16 +5,17 @@ import SwiftUI
 struct ClaudeNodApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var appState = AppState()
+    private let settingsWindowID = "claudenod-settings"
 
     var body: some Scene {
         MenuBarExtra("ClaudeNod", systemImage: appState.menuBarSymbolName) {
-            MenuBarView()
+            MenuBarView(settingsWindowID: settingsWindowID)
                 .environmentObject(appState)
                 .frame(width: 320)
         }
         .menuBarExtraStyle(.window)
 
-        Settings {
+        Window("Settings", id: settingsWindowID) {
             SettingsView()
                 .environmentObject(appState)
                 .frame(width: 460, height: 360)

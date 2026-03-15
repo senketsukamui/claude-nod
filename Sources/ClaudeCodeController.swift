@@ -21,12 +21,13 @@ final class ClaudeCodeController {
     private let supportedBundleHints = [
         "com.apple.Terminal",
         "com.googlecode.iterm2",
+        "com.mitchellh.ghostty",
         "dev.warp.Warp-Stable",
         "com.anthropic.claudefordesktop"
     ]
 
     func send(payload: String) throws {
-        guard AXIsProcessTrusted() else {
+        guard AccessibilityPermissionService.probeAccessibilityAccess() else {
             throw ClaudeControlError.accessibilityDenied
         }
 

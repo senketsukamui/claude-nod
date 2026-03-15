@@ -7,7 +7,7 @@
 
 Accept or reject Claude Code prompts by nodding or shaking your head while wearing AirPods.
 
-ClaudeNod is a tiny native macOS menu bar utility built for fun. It reads AirPods head motion, detects simple gestures, and sends approval input to the frontmost Claude Code host on your Mac.
+ClaudeNod is a tiny native macOS menu bar utility built for fun. It reads AirPods head motion, detects simple gestures, and can now talk to a tiny local Claude wrapper so setup is much less fragile.
 
 ## Demo Idea
 
@@ -22,7 +22,27 @@ ClaudeNod is a tiny native macOS menu bar utility built for fun. It reads AirPod
 - Detects `nod` and `shake` gestures with lightweight heuristics
 - Lives in the macOS menu bar
 - Sends configurable accept and reject payloads like `y + Enter` or `n + Enter`
+- Supports a local `bin/claudenod` wrapper that watches real Claude output and sends responses back without screen scraping
+- Falls back to frontmost-app detection for Terminal, iTerm, Ghostty, Warp, and Claude Desktop
 - Works as a guarded one-shot action so accidental head movement is less risky
+
+## Easiest Setup
+
+The smoothest path is:
+
+1. Run the macOS app from Xcode
+2. Launch Claude through the wrapper:
+
+```bash
+chmod +x bin/claudenod
+bin/claudenod
+```
+
+3. Use Claude normally
+4. When Claude shows a confirmation, ClaudeNod auto-arms
+5. Nod to accept or shake to reject
+
+In wrapper mode, ClaudeNod reads Claude output directly and sends the response back to the same session. That means no Accessibility or Screen Recording permission is required for the main happy path.
 
 ## Why It Is "Armed" In v1
 
@@ -31,7 +51,7 @@ The first real product risk is accidental approval.
 So v1 uses an intentionally safe flow:
 
 1. Open a Claude Code confirmation
-2. Arm ClaudeNod from the menu bar
+2. Let ClaudeNod auto-arm when it detects the prompt, or arm it manually
 3. Nod to accept or shake to reject
 
 That gives us a working utility now while we build smarter prompt detection next.
@@ -42,14 +62,16 @@ Supported hosts right now:
 
 - Terminal
 - iTerm
+- Ghostty
 - Warp
 - Claude desktop, if the confirmation field is focused
+- ClaudeNod wrapper
 
 Current limitations:
 
-- ClaudeNod does not automatically detect Claude confirmation state yet
+- Wrapper prompt detection still uses text heuristics and may miss unusual confirmation wording
 - Gesture tuning is early and may need calibration per person
-- Accessibility permission is required to send input
+- Accessibility permission is only required for fallback frontmost-app control
 - This is not App Store packaged yet
 
 ## Screenshots
@@ -84,20 +106,28 @@ Sources/
 - macOS 14 or newer
 - Xcode 16+ or a recent Swift toolchain
 - Supported AirPods with motion data
-- Accessibility permission enabled for ClaudeNod
+- Optional Accessibility permission for fallback host control
 
 ### Run In Xcode
 
 1. Clone the repo
-2. Open [Package.swift](./Package.swift) in Xcode
+2. Open [ClaudeNod.xcodeproj](./ClaudeNod.xcodeproj) in Xcode
 3. Select the `ClaudeNod` scheme
 4. Run the app
 5. Look for the `ClaudeNod` icon in the menu bar
 
+### Regenerate The Xcode Project
+
+If you add or remove source files, regenerate the checked-in project with:
+
+```bash
+ruby scripts/generate_xcodeproj.rb
+```
+
 ### Build From Terminal
 
 ```bash
-swift build
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project ClaudeNod.xcodeproj -scheme ClaudeNod -configuration Debug build
 ```
 
 ## How To Test
@@ -126,18 +156,32 @@ This tests the same approval pipeline without needing a real gesture.
 
 ### 4. Test With Claude Code
 
+Recommended:
+
+- Start Claude with `bin/claudenod`
+- Open a prompt that expects confirmation
+- Watch ClaudeNod switch to `Connected to ClaudeNod wrapper`
+- Nod to accept or shake to reject
+
+Fallback mode:
+
 - Bring Claude Code or its terminal host to the front
+- Grant Accessibility if you want direct frontmost-app control
 - Open a prompt that expects confirmation
 - Arm ClaudeNod
 - Nod to accept or shake to reject
 
 ## Permissions
 
-ClaudeNod needs macOS Accessibility permission so it can send keyboard input to the frontmost app.
+ClaudeNod only needs macOS Accessibility and Screen Recording permissions for the fallback mode that inspects and controls an already-open host app.
 
-You can open the relevant settings from inside the app, or go manually to:
+If you use the wrapper path, you can skip those permissions entirely.
+
+For fallback mode, you can open the relevant settings from inside the app, or go manually to:
 
 `System Settings > Privacy & Security > Accessibility`
+
+For the most reliable permission behavior, run the bundled app target from `ClaudeNod.xcodeproj` instead of the old Swift package executable.
 
 ## Roadmap
 
@@ -148,7 +192,8 @@ You can open the relevant settings from inside the app, or go manually to:
 - [x] Nod and shake detection
 - [x] Configurable accept and reject payloads
 - [x] Safe one-shot armed mode
-- [ ] Automatic detection of Claude confirmation prompts
+- [x] Automatic detection of likely Claude confirmation prompts
+- [x] Wrapper mode that reads Claude output directly
 - [ ] Better calibration UX
 - [ ] Polished app icon and onboarding
 

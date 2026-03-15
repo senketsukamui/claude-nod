@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+
+import argparse
+import json
+import os
+import pty
+import re
+import select
+import signal
+import socket
+import subprocess
+import sys
+import termios
+import time
+import tty
+import uuid
+from pathlib import Path
+
+
+APP_SUPPORT = Path.home() / "Library" / "Application Support" / "ClaudeNod"
+STATE_FILE = APP_SUPPORT / "bridge-state.json"
+SOCKET_FILE = APP_SUPPORT / "bridge.sock"
+
+CONFIRMATION_HINTS = [
+    "should i proceed",
+    "confirm",
+    "yes, proceed",
+    "no, cancel",
+    "enter to select",
+    "to navigate",
+    "esc to cancel",
+    "approve",
+    "allow this action",
+]
+
+
+def strip_ansi(text: str) -> str:
+    return re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", text)
+
+
+def normalize_preview(text: str) -> str:
+    compact = " ".join(text.split())
+    return compact[:220] if compact else "No readable Claude output yet"
+
+
+def build_state(session_id: str, pid: int, prompt_visible: bool, evidence: str, preview: str) -> dict:
+    return {
+        "sessionID": session_id,
+        "pid": pid,
+        "hostName": "Claude wrapper",
+        "promptVisible": prompt_visible,
+        "evidence": evidence,
+        "preview": preview,
+        "updatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+
+
+def write_state(state: dict) -> None:
+    APP_SUPPORT.mkdir(parents=True, exist_ok=True)
+    tmp_file = STATE_FILE.with_suffix(".tmp")
+    tmp_file.write_text(json.dumps(state), encoding="utf-8")
+    tmp_file.replace(STATE_FILE)
+
+
+def clear_state() -> None:
+    for path in [STATE_FILE, SOCKET_FILE]:
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def detect_prompt(buffer_text: str) -> tuple[bool, str, str]:
+    cleaned = strip_ansi(buffer_text).lower()
+    preview = normalize_preview(cleaned[-2000:])
+    for hint in CONFIRMATION_HINTS:
+        if hint in cleaned:
+            return True, hint, preview
+    return False, "Watching Claude output", preview
+
+
+def resolve_claude_command(explicit_command: str | None) -> list[str]:
+    if explicit_command:
+        return [explicit_command]
+    return ["claude"]
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Launch Claude through ClaudeNod's local bridge.")
+    parser.add_argument("--command", help="Path to the Claude executable to launch.")
+    parser.add_argument("args", nargs=argparse.REMAINDER, help="Arguments passed through to Claude.")
+    parsed = parser.parse_args()
+
+    command = resolve_claude_command(parsed.command)
+    passthrough = parsed.args
+    if passthrough and passthrough[0] == "--":
+        passthrough = passthrough[1:]
+
+    argv = command + passthrough
+
+    APP_SUPPORT.mkdir(parents=True, exist_ok=True)
+    clear_state()
+
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server.bind(str(SOCKET_FILE))
+    server.listen(1)
+    server.setblocking(False)
+
+    session_id = str(uuid.uuid4())
+    master_fd, child_fd = pty.openpty()
+    child = subprocess.Popen(argv, stdin=child_fd, stdout=child_fd, stderr=child_fd, close_fds=True)
+    os.close(child_fd)
+
+    stdin_fd = sys.stdin.fileno()
+    stdout_fd = sys.stdout.fileno()
+    old_tty = termios.tcgetattr(stdin_fd)
+    tty.setraw(stdin_fd)
+
+    signal.signal(signal.SIGINT, lambda *_: child.send_signal(signal.SIGINT))
+    signal.signal(signal.SIGTERM, lambda *_: child.send_signal(signal.SIGTERM))
+
+    buffer = ""
+    last_publish = 0.0
+
+    try:
+        while True:
+            prompt_visible, evidence, preview = detect_prompt(buffer)
+            now = time.time()
+            if now - last_publish > 0.35:
+                write_state(build_state(session_id, child.pid, prompt_visible, evidence, preview))
+                last_publish = now
+
+            if child.poll() is not None:
+                break
+
+            readable, _, _ = select.select([stdin_fd, master_fd, server], [], [], 0.1)
+
+            if server in readable:
+                conn, _ = server.accept()
+                with conn:
+                    payload = conn.recv(8192)
+                    if payload:
+                        try:
+                            message = json.loads(payload.decode("utf-8"))
+                            if message.get("kind") == "send_payload":
+                                os.write(master_fd, message.get("payload", "").encode("utf-8"))
+                        except json.JSONDecodeError:
+                            pass
+
+            if stdin_fd in readable:
+                data = os.read(stdin_fd, 8192)
+                if data:
+                    os.write(master_fd, data)
+
+            if master_fd in readable:
+                data = os.read(master_fd, 8192)
+                if not data:
+                    break
+                os.write(stdout_fd, data)
+                decoded = data.decode("utf-8", errors="ignore")
+                buffer = (buffer + decoded)[-12000:]
+    finally:
+        termios.tcsetattr(stdin_fd, termios.TCSADRAIN, old_tty)
+        clear_state()
+        try:
+            server.close()
+        except OSError:
+            pass
+        try:
+            os.close(master_fd)
+        except OSError:
+            pass
+
+    return child.wait()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
