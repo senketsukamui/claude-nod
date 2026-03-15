@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Show toolchain versions
+        run: |
+          swift --version
+          xcodebuild -version
+
+      - name: Verify wrapper script syntax
+        run: python3 -m py_compile bin/claudenod
+
+      - name: Regenerate Xcode project
+        run: ruby scripts/generate_xcodeproj.rb
+
+      - name: Build ClaudeNod
+        run: xcodebuild -project ClaudeNod.xcodeproj -scheme ClaudeNod -configuration Debug build

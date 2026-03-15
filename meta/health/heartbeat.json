@@ -1,0 +1,8 @@
+{
+  "updated_at": "2026-03-16T00:00:00Z",
+  "workflow_run_at": "local-seed",
+  "git_sha": "local",
+  "swift_version": "unknown",
+  "xcode_version": "unknown",
+  "status": "seeded"
+}

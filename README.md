@@ -2,6 +2,8 @@
 
 [![macOS](https://img.shields.io/badge/macOS-14%2B-111111?logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-6-orange?logo=swift&logoColor=white)](https://www.swift.org/)
+[![CI](https://github.com/senketsukamui/claude-nod/actions/workflows/ci.yml/badge.svg)](https://github.com/senketsukamui/claude-nod/actions/workflows/ci.yml)
+[![Nightly Health](https://github.com/senketsukamui/claude-nod/actions/workflows/nightly-health.yml/badge.svg)](https://github.com/senketsukamui/claude-nod/actions/workflows/nightly-health.yml)
 [![Status](https://img.shields.io/badge/status-fun%20demo-1f8b4c)](https://github.com/senketsukamui/claude-nod)
 [![License](https://img.shields.io/badge/license-MIT-blue)](#license)
 
@@ -207,6 +209,12 @@ For the most reliable permission behavior, run the bundled app target from `Clau
 ## Contributing
 
 Issues and fun ideas are welcome. If you try it with different AirPods or terminal setups, feedback is especially useful because gesture tuning will vary a lot in the real world.
+
+## Automation
+
+- `CI` builds ClaudeNod on pushes and pull requests
+- `Dependabot` keeps GitHub Actions dependencies fresh
+- `Nightly Health` rebuilds the app and refreshes [meta/health/heartbeat.json](./meta/health/heartbeat.json) with the latest successful toolchain snapshot
 
 ## License
 

@@ -1,0 +1,67 @@
+name: Nightly Health
+
+on:
+  schedule:
+    - cron: "23 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  heartbeat:
+    runs-on: macos-15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Collect toolchain versions
+        id: versions
+        run: |
+          echo "run_time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+          echo "swift_version=$(swift --version | head -n 1)" >> "$GITHUB_OUTPUT"
+          echo "xcode_version=$(xcodebuild -version | paste -sd ' | ' -)" >> "$GITHUB_OUTPUT"
+
+      - name: Verify wrapper script syntax
+        run: python3 -m py_compile bin/claudenod
+
+      - name: Regenerate Xcode project
+        run: ruby scripts/generate_xcodeproj.rb
+
+      - name: Build ClaudeNod
+        run: xcodebuild -project ClaudeNod.xcodeproj -scheme ClaudeNod -configuration Debug build
+
+      - name: Update heartbeat
+        run: |
+          mkdir -p meta/health
+          cat > meta/health/heartbeat.json <<EOF
+          {
+            "updated_at": "${{ steps.versions.outputs.run_time }}",
+            "workflow_run_at": "${{ github.run_id }}",
+            "git_sha": "${{ github.sha }}",
+            "swift_version": "${{ steps.versions.outputs.swift_version }}",
+            "xcode_version": "${{ steps.versions.outputs.xcode_version }}",
+            "status": "passing"
+          }
+          EOF
+
+      - name: Commit heartbeat
+        run: |
+          if git diff --quiet -- meta/health/heartbeat.json; then
+            echo "No heartbeat changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add meta/health/heartbeat.json
+          git commit -m "Update nightly health heartbeat"
+          git push origin HEAD:main
