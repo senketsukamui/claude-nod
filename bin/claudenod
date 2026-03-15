@@ -15,6 +15,7 @@ import time
 import tty
 import uuid
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 
 APP_SUPPORT = Path.home() / "Library" / "Application Support" / "ClaudeNod"
@@ -24,6 +25,7 @@ SOCKET_FILE = APP_SUPPORT / "bridge.sock"
 CONFIRMATION_HINTS = [
     "should i proceed",
     "confirm",
+    "what would you like me to confirm",
     "yes, proceed",
     "no, cancel",
     "enter to select",
@@ -35,7 +37,10 @@ CONFIRMATION_HINTS = [
 
 
 def strip_ansi(text: str) -> str:
-    return re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", text)
+    text = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", text)
+    text = re.sub(r"\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)", "", text)
+    text = re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", "", text)
+    return text
 
 
 def normalize_preview(text: str) -> str:
@@ -43,7 +48,16 @@ def normalize_preview(text: str) -> str:
     return compact[:220] if compact else "No readable Claude output yet"
 
 
-def build_state(session_id: str, pid: int, prompt_visible: bool, evidence: str, preview: str) -> dict:
+def build_state(
+    session_id: str,
+    pid: int,
+    prompt_visible: bool,
+    evidence: str,
+    preview: str,
+    guidance: str | None,
+    nod_sequence: list[str] | None,
+    shake_sequence: list[str] | None,
+) -> dict:
     return {
         "sessionID": session_id,
         "pid": pid,
@@ -51,15 +65,19 @@ def build_state(session_id: str, pid: int, prompt_visible: bool, evidence: str, 
         "promptVisible": prompt_visible,
         "evidence": evidence,
         "preview": preview,
+        "guidance": guidance,
+        "nodSequence": nod_sequence,
+        "shakeSequence": shake_sequence,
         "updatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
 
 
 def write_state(state: dict) -> None:
     APP_SUPPORT.mkdir(parents=True, exist_ok=True)
-    tmp_file = STATE_FILE.with_suffix(".tmp")
-    tmp_file.write_text(json.dumps(state), encoding="utf-8")
-    tmp_file.replace(STATE_FILE)
+    with NamedTemporaryFile("w", encoding="utf-8", dir=APP_SUPPORT, prefix="bridge-state-", suffix=".tmp", delete=False) as tmp_file:
+        tmp_file.write(json.dumps(state))
+        temp_path = Path(tmp_file.name)
+    temp_path.replace(STATE_FILE)
 
 
 def clear_state() -> None:
@@ -70,13 +88,67 @@ def clear_state() -> None:
             pass
 
 
-def detect_prompt(buffer_text: str) -> tuple[bool, str, str]:
-    cleaned = strip_ansi(buffer_text).lower()
+def extract_menu_options(text: str) -> tuple[list[tuple[int, str]], int | None]:
+    options: list[tuple[int, str]] = []
+    selected_index: int | None = None
+    lines = text.splitlines()
+
+    for line in lines[-80:]:
+        stripped = line.strip()
+        if not stripped:
+            continue
+
+        selected = stripped.startswith(">")
+        if selected:
+            stripped = stripped[1:].strip()
+
+        match = re.match(r"(\d+)\.\s+(.+)", stripped)
+        if not match:
+            continue
+
+        index = int(match.group(1))
+        label = " ".join(match.group(2).split())
+        if not label:
+            continue
+
+        options.append((index, label))
+        if selected:
+            selected_index = index
+
+    unique: list[tuple[int, str]] = []
+    seen: set[int] = set()
+    for index, label in options:
+        if index in seen:
+            continue
+        seen.add(index)
+        unique.append((index, label))
+
+    return unique, selected_index
+
+
+def sequence_for_option(target_index: int, selected_index: int | None) -> list[str]:
+    del selected_index
+    return [str(target_index), "\r"]
+
+
+def detect_prompt(buffer_text: str) -> tuple[bool, str, str, str | None, str | None, str | None]:
+    raw = strip_ansi(buffer_text)
+    cleaned = raw.lower()
     preview = normalize_preview(cleaned[-2000:])
+    menu_options, selected_index = extract_menu_options(raw)
+
+    if len(menu_options) >= 2 and "enter to select" in cleaned:
+        option1 = menu_options[0]
+        option2 = menu_options[1]
+        guidance = f"Nod: 1. {option1[1]} | Shake: 2. {option2[1]}"
+        nod_sequence = sequence_for_option(option1[0], selected_index)
+        shake_sequence = sequence_for_option(option2[0], selected_index)
+        return True, "Detected numbered choice prompt", preview, guidance, nod_sequence, shake_sequence
+
     for hint in CONFIRMATION_HINTS:
         if hint in cleaned:
-            return True, hint, preview
-    return False, "Watching Claude output", preview
+            return True, hint, preview, "Nod: accept | Shake: reject", ["y", "\r"], ["n", "\r"]
+    return False, "Watching Claude output", preview, None, None, None
 
 
 def resolve_claude_command(explicit_command: str | None) -> list[str]:
@@ -124,10 +196,21 @@ def main() -> int:
 
     try:
         while True:
-            prompt_visible, evidence, preview = detect_prompt(buffer)
+            prompt_visible, evidence, preview, guidance, nod_sequence, shake_sequence = detect_prompt(buffer)
             now = time.time()
             if now - last_publish > 0.35:
-                write_state(build_state(session_id, child.pid, prompt_visible, evidence, preview))
+                write_state(
+                    build_state(
+                        session_id,
+                        child.pid,
+                        prompt_visible,
+                        evidence,
+                        preview,
+                        guidance,
+                        nod_sequence,
+                        shake_sequence,
+                    )
+                )
                 last_publish = now
 
             if child.poll() is not None:
@@ -138,12 +221,18 @@ def main() -> int:
             if server in readable:
                 conn, _ = server.accept()
                 with conn:
-                    payload = conn.recv(8192)
+                    conn.setblocking(True)
+                    try:
+                        payload = conn.recv(8192)
+                    except BlockingIOError:
+                        payload = b""
                     if payload:
                         try:
                             message = json.loads(payload.decode("utf-8"))
-                            if message.get("kind") == "send_payload":
-                                os.write(master_fd, message.get("payload", "").encode("utf-8"))
+                            if message.get("kind") == "send_sequence":
+                                for chunk in message.get("payloads", []):
+                                    os.write(master_fd, chunk.encode("utf-8"))
+                                    time.sleep(0.04)
                         except json.JSONDecodeError:
                             pass
 

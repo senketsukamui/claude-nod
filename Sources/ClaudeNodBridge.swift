@@ -8,6 +8,9 @@ struct ClaudeNodBridgeState: Codable {
     let promptVisible: Bool
     let evidence: String
     let preview: String
+    let guidance: String?
+    let nodSequence: [String]?
+    let shakeSequence: [String]?
     let updatedAt: Date
 
     var isFresh: Bool {
@@ -53,6 +56,10 @@ final class ClaudeNodBridge {
     }
 
     func send(payload: String) throws {
+        try send(sequence: [payload])
+    }
+
+    func send(sequence: [String]) throws {
         guard activeState() != nil else {
             throw ClaudeNodBridgeError.inactiveSession
         }
@@ -90,7 +97,7 @@ final class ClaudeNodBridge {
             throw ClaudeNodBridgeError.socketUnavailable
         }
 
-        let command = ClaudeNodBridgeCommand(kind: "send_payload", payload: payload)
+        let command = ClaudeNodBridgeCommand(kind: "send_sequence", payloads: sequence)
         let data = try encoder.encode(command)
         let sentCount = data.withUnsafeBytes { bytes in
             Darwin.send(socketFD, bytes.baseAddress, bytes.count, 0)
@@ -104,5 +111,5 @@ final class ClaudeNodBridge {
 
 private struct ClaudeNodBridgeCommand: Codable {
     let kind: String
-    let payload: String
+    let payloads: [String]
 }
