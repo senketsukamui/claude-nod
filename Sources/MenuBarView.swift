@@ -21,9 +21,11 @@ struct MenuBarView: View {
             statusRow(title: "Accessibility", value: appState.accessibilityStatus)
             statusRow(title: "Screen", value: appState.screenCaptureStatus)
             statusRow(title: "Prompt", value: appState.promptStatus)
+            statusRow(title: "Choices", value: appState.choiceGuidance)
             statusRow(title: "Prompt Text", value: appState.promptDebugPreview)
             statusRow(title: "Gesture", value: appState.gestureStatus)
             statusRow(title: "Action", value: appState.lastAction)
+            statusRow(title: "Dispatch", value: appState.dispatchStatus)
             statusRow(title: "Mode", value: appState.integrationStatus)
 
             VStack(alignment: .leading, spacing: 6) {
@@ -48,6 +50,17 @@ struct MenuBarView: View {
                 }
                 Button("Test Reject") {
                     appState.sendTestGesture(.shake)
+                }
+            }
+
+            if appState.wrapperStatus.contains("Connected") {
+                HStack {
+                    Button("Choose 1") {
+                        appState.choosePrimaryOption()
+                    }
+                    Button("Choose 2") {
+                        appState.chooseSecondaryOption()
+                    }
                 }
             }
 

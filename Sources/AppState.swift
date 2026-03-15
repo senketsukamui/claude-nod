@@ -10,9 +10,16 @@ final class AppState: ObservableObject {
     @Published var integrationStatus = "Watching for Claude confirmations"
     @Published var promptStatus = "No Claude confirmation detected"
     @Published var promptDebugPreview = "No inspected text yet"
+    @Published var choiceGuidance = "Nod accepts, shake rejects" {
+        didSet { syncChoiceOverlay() }
+    }
     @Published var accessibilityStatus = "Checking Accessibility permission..."
     @Published var screenCaptureStatus = "Checking screen capture permission..."
     @Published var wrapperStatus = "No ClaudeNod wrapper session detected"
+    @Published var showChoiceOverlay = false {
+        didSet { syncChoiceOverlay() }
+    }
+    @Published var dispatchStatus = "No wrapper command sent"
     @Published var isArmed = false
     @Published var autoArmEnabled = true
     @Published var livePitch = 0.0
@@ -30,6 +37,7 @@ final class AppState: ObservableObject {
     let accessibilityPermissionService: AccessibilityPermissionService
     let screenCapturePermissionService: ScreenCapturePermissionService
     let bridge: ClaudeNodBridge
+    let choiceOverlayController: ChoiceOverlayController
 
     private var cancellables: Set<AnyCancellable> = []
     private var promptPollingTask: Task<Void, Never>?
@@ -42,7 +50,8 @@ final class AppState: ObservableObject {
         promptDetector: ClaudePromptDetector = ClaudePromptDetector(),
         accessibilityPermissionService: AccessibilityPermissionService = AccessibilityPermissionService(),
         screenCapturePermissionService: ScreenCapturePermissionService = ScreenCapturePermissionService(),
-        bridge: ClaudeNodBridge = ClaudeNodBridge()
+        bridge: ClaudeNodBridge = ClaudeNodBridge(),
+        choiceOverlayController: ChoiceOverlayController = ChoiceOverlayController()
     ) {
         self.motionService = motionService
         self.gestureDetector = gestureDetector
@@ -51,6 +60,7 @@ final class AppState: ObservableObject {
         self.accessibilityPermissionService = accessibilityPermissionService
         self.screenCapturePermissionService = screenCapturePermissionService
         self.bridge = bridge
+        self.choiceOverlayController = choiceOverlayController
 
         wireUp()
         motionService.start()
@@ -72,6 +82,9 @@ final class AppState: ObservableObject {
     func toggleArmed() {
         isArmed.toggle()
         integrationStatus = isArmed ? "Armed for the next Claude confirmation" : "Watching for Claude confirmations"
+        if !isArmed {
+            showChoiceOverlay = false
+        }
     }
 
     func openSettings() {
@@ -81,6 +94,14 @@ final class AppState: ObservableObject {
 
     func sendTestGesture(_ gesture: GestureKind) {
         handleGesture(gesture)
+    }
+
+    func choosePrimaryOption() {
+        sendBridgeChoice(index: 1)
+    }
+
+    func chooseSecondaryOption() {
+        sendBridgeChoice(index: 2)
     }
 
     func requestAccessibilityIfNeeded() {
@@ -194,6 +215,7 @@ final class AppState: ObservableObject {
         if let bridgeState = bridge.activeState() {
             wrapperStatus = "Connected to ClaudeNod wrapper"
             promptDebugPreview = bridgeState.preview
+            choiceGuidance = bridgeState.guidance ?? "Nod accepts, shake rejects"
             promptStatus = bridgeState.promptVisible
                 ? "Confirmation detected in \(bridgeState.hostName)"
                 : "Watching \(bridgeState.hostName): \(bridgeState.evidence)"
@@ -206,11 +228,15 @@ final class AppState: ObservableObject {
                 integrationStatus = "Watching for Claude confirmations"
             }
 
+            showChoiceOverlay = bridgeState.promptVisible && isArmed
+
             lastDetectionFingerprint = fingerprint
             return
         }
 
         wrapperStatus = "No ClaudeNod wrapper session detected"
+        choiceGuidance = "Nod accepts, shake rejects"
+        showChoiceOverlay = false
 
         do {
             let detection = try promptDetector.detectFrontmostPrompt()
@@ -236,12 +262,14 @@ final class AppState: ObservableObject {
                 if !isArmed {
                     integrationStatus = "Waiting for wrapper session or Accessibility permission"
                 }
+                showChoiceOverlay = false
             case .unsupportedHost:
                 promptStatus = "Launch Claude through the ClaudeNod wrapper, or bring a supported host to the front"
                 promptDebugPreview = "No active wrapper session and frontmost app is not a supported host"
                 if !isArmed {
                     integrationStatus = "Watching for Claude confirmations"
                 }
+                showChoiceOverlay = false
             }
             lastDetectionFingerprint = ""
         } catch {
@@ -250,6 +278,7 @@ final class AppState: ObservableObject {
             if !isArmed {
                 integrationStatus = "Watching for Claude confirmations"
             }
+            showChoiceOverlay = false
             lastDetectionFingerprint = ""
         }
     }
@@ -262,31 +291,98 @@ final class AppState: ObservableObject {
             return
         }
 
+        let bridgeState = bridge.activeState()
+
         do {
             switch gesture {
             case .nod:
-                try sendActionPayload(acceptPayload)
-                lastAction = "Accepted with nod at \(DateFormatter.actionClock.string(from: .now))"
+                try sendActionSequence(bridgeState?.nodSequence ?? [acceptPayload])
+                lastAction = lastActionDescription(for: .nod, bridgeState: bridgeState)
             case .shake:
-                try sendActionPayload(rejectPayload)
-                lastAction = "Rejected with shake at \(DateFormatter.actionClock.string(from: .now))"
+                try sendActionSequence(bridgeState?.shakeSequence ?? [rejectPayload])
+                lastAction = lastActionDescription(for: .shake, bridgeState: bridgeState)
             }
 
-            integrationStatus = bridge.activeState() == nil
+            integrationStatus = bridgeState == nil
                 ? "Action sent to the frontmost app"
                 : "Action sent to the ClaudeNod wrapper"
             isArmed = false
+            showChoiceOverlay = false
             lastDetectionFingerprint = ""
         } catch {
             integrationStatus = "Could not send action: \(error.localizedDescription)"
         }
     }
 
-    private func sendActionPayload(_ payload: String) throws {
+    private func sendActionSequence(_ sequence: [String]) throws {
         if bridge.activeState() != nil {
-            try bridge.send(payload: payload)
+            dispatchStatus = "Sending wrapper sequence: \(debugDescription(for: sequence))"
+            try bridge.send(sequence: sequence)
         } else {
-            try claudeController.send(payload: payload)
+            dispatchStatus = "Sending frontmost-app sequence: \(debugDescription(for: sequence))"
+            for payload in sequence {
+                try claudeController.send(payload: payload)
+            }
+        }
+    }
+
+    private func sendBridgeChoice(index: Int) {
+        guard let bridgeState = bridge.activeState() else {
+            dispatchStatus = "No active wrapper session for manual choice"
+            return
+        }
+
+        let sequence: [String]
+        switch index {
+        case 1:
+            sequence = bridgeState.nodSequence ?? ["1", "\r"]
+        case 2:
+            sequence = bridgeState.shakeSequence ?? ["2", "\r"]
+        default:
+            dispatchStatus = "Unsupported choice index \(index)"
+            return
+        }
+
+        do {
+            try sendActionSequence(sequence)
+            lastAction = "Manual choice \(index) sent at \(DateFormatter.actionClock.string(from: .now))"
+            integrationStatus = "Manual choice \(index) sent to the ClaudeNod wrapper"
+        } catch {
+            integrationStatus = "Could not send manual choice: \(error.localizedDescription)"
+        }
+    }
+
+    private func debugDescription(for sequence: [String]) -> String {
+        sequence.map { payload in
+            payload
+                .replacingOccurrences(of: "\r", with: "\\r")
+                .replacingOccurrences(of: "\n", with: "\\n")
+                .replacingOccurrences(of: "\u{1B}", with: "\\e")
+        }
+        .joined(separator: ", ")
+    }
+
+    private func syncChoiceOverlay() {
+        choiceOverlayController.update(isVisible: showChoiceOverlay, guidance: choiceGuidance)
+    }
+
+    private func lastActionDescription(for gesture: GestureKind, bridgeState: ClaudeNodBridgeState?) -> String {
+        let clock = DateFormatter.actionClock.string(from: .now)
+
+        if let guidance = bridgeState?.guidance {
+            switch gesture {
+            case .nod:
+                return "Nod chose option 1 at \(clock) (\(guidance))"
+            case .shake:
+                return "Shake chose option 2 at \(clock) (\(guidance))"
+            }
+        }
+
+        switch gesture {
+        case .nod:
+            return "Accepted with nod at \(clock)"
+        case .shake:
+            return "Rejected with shake at \(clock)"
         }
     }
 }
