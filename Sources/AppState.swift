@@ -19,7 +19,6 @@ final class AppState: ObservableObject {
     @Published var showChoiceOverlay = false {
         didSet { syncChoiceOverlay() }
     }
-    @Published var dispatchStatus = "No wrapper command sent"
     @Published var isArmed = false
     @Published var autoArmEnabled = true
     @Published var livePitch = 0.0
@@ -85,23 +84,6 @@ final class AppState: ObservableObject {
         if !isArmed {
             showChoiceOverlay = false
         }
-    }
-
-    func openSettings() {
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        NSApp.activate(ignoringOtherApps: true)
-    }
-
-    func sendTestGesture(_ gesture: GestureKind) {
-        handleGesture(gesture)
-    }
-
-    func choosePrimaryOption() {
-        sendBridgeChoice(index: 1)
-    }
-
-    func chooseSecondaryOption() {
-        sendBridgeChoice(index: 2)
     }
 
     func requestAccessibilityIfNeeded() {
@@ -316,50 +298,12 @@ final class AppState: ObservableObject {
 
     private func sendActionSequence(_ sequence: [String]) throws {
         if bridge.activeState() != nil {
-            dispatchStatus = "Sending wrapper sequence: \(debugDescription(for: sequence))"
             try bridge.send(sequence: sequence)
         } else {
-            dispatchStatus = "Sending frontmost-app sequence: \(debugDescription(for: sequence))"
             for payload in sequence {
                 try claudeController.send(payload: payload)
             }
         }
-    }
-
-    private func sendBridgeChoice(index: Int) {
-        guard let bridgeState = bridge.activeState() else {
-            dispatchStatus = "No active wrapper session for manual choice"
-            return
-        }
-
-        let sequence: [String]
-        switch index {
-        case 1:
-            sequence = bridgeState.nodSequence ?? ["1", "\r"]
-        case 2:
-            sequence = bridgeState.shakeSequence ?? ["2", "\r"]
-        default:
-            dispatchStatus = "Unsupported choice index \(index)"
-            return
-        }
-
-        do {
-            try sendActionSequence(sequence)
-            lastAction = "Manual choice \(index) sent at \(DateFormatter.actionClock.string(from: .now))"
-            integrationStatus = "Manual choice \(index) sent to the ClaudeNod wrapper"
-        } catch {
-            integrationStatus = "Could not send manual choice: \(error.localizedDescription)"
-        }
-    }
-
-    private func debugDescription(for sequence: [String]) -> String {
-        sequence.map { payload in
-            payload
-                .replacingOccurrences(of: "\r", with: "\\r")
-                .replacingOccurrences(of: "\n", with: "\\n")
-                .replacingOccurrences(of: "\u{1B}", with: "\\e")
-        }
-        .joined(separator: ", ")
     }
 
     private func syncChoiceOverlay() {

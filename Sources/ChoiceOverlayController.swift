@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 
+@MainActor
 final class ChoiceOverlayController {
     private var panel: NSPanel?
     private var hostingController: NSHostingController<ChoiceOverlayView>?
@@ -60,18 +61,18 @@ private struct ChoiceOverlayView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("ClaudeNod")
-                .font(.headline)
-            Text("Head Gesture Ready")
-                .font(.subheadline.weight(.semibold))
+                .font(.headline.weight(.semibold))
+            Text("Take a breath, then choose.")
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
             Text(guidance)
                 .font(.callout.weight(.medium))
-            Text("Nod picks option 1. Shake picks option 2.")
+            Text("Nod for the first choice. Shake for the second.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
         .padding(18)
         .frame(width: 320)
-        .background(.ultraThinMaterial)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
